@@ -62,9 +62,11 @@ float temp_spray_int = 0;
 float moist_spray_rate = 0;
 float moist_spray_int = 0;
 PID temp_pid(&temperature, &temp_spray_rate, &temp_goal, .00001, .001, .0001);//PID tuning will be needed here or we just abandon using PID loops
-PID moist_PID(&soil_moisture, &moiust_spray_int, &moisture_goal, .0001, .001, .0001);
+//PID moist_PID(&soil_moisture, &moiust_spray_int, &moisture_goal, .0001, .001, .0001);
+//due to relatively sealed nature the moisture loop will be slow/stable enough to just check the soil moisture every 5 minutes and spray if needed
 
 int milli_time;
+int count5 = 0;//count of 5 minute intervals that have passed
 void setup() {
  Serial.begin(9600);
  lcd.begin(16, 2);
@@ -122,22 +124,35 @@ void loop() {
   int milli_curr = millis();
   float delta = (float)millis_curr / (float)milli_time;
   temp_PID.Compute()
-  moist_PID.Compute();
+  //moist_PID.Compute();
   temp_spray_int += delta * temp_spray_rate;
-  moist_spray_int += delta + moist_spray_rate;
+  //moist_spray_int += delta + moist_spray_rate;
 
   if(temp_spray_int > 1)
   {
     temp_spray_int--;
     //spray temperature bottle
   }
-  if(moist_spray_int > 1)
+  // if(moist_spray_int > 1)
+  // {
+  //   moist_spray_int--;
+  //   //spray moisture bottle
+  // }
+  if(count5 * 300 * 1000 < millis())
   {
-    moist_spray_int--;
-    //spray moisture bottle
+    every5();
+    count5++;
   }
-  
   delay(100);
+}
+
+//is executed every 5 minutes
+void every5()
+{
+  if(soil_moisture < moisture_goal)
+  {
+    //spray bottle
+  }
 }
 
 int readSoil()
