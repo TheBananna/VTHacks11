@@ -10,6 +10,7 @@
 #include "SparkFunMPL3115A2.h"
 #include "Adafruit_CCS811.h"
 #include "Adafruit_VEML6070.h"
+#include "PID_v1.h"
 rgb_lcd lcd;
 double Temp = 99;
 double Humidity = 30.3;
@@ -52,7 +53,18 @@ Adafruit_CCS811 ccs;
 
 Adafruit_VEML6070 uv = Adafruit_VEML6070();
 
+float temperature;
+float temp_goal;
+float soil_moisture;
+float moisture_goal;
+float temp_spray_rate = 0;
+float temp_spray_int = 0;
+float moist_spray_rate = 0;
+float moist_spray_int = 0;
+PID temp_pid(&temperature, &temp_spray_rate, &temp_goal, .00001, .001, .0001);//PID tuning will be needed here or we just abandon using PID loops
+PID moist_PID(&soil_moisture, &moiust_spray_int, &moisture_goal, .0001, .001, .0001);
 
+int milli_time;
 void setup() {
  Serial.begin(9600);
  lcd.begin(16, 2);
@@ -82,11 +94,13 @@ void setup() {
   }
 
   uv.begin(VEML6070_1_T);  // pass in the integration time constant
-
+  milli_time = millis();
+  temp_PID.SetMode(AUTOMATIC);
+  moist_PID.SetMode(AUTOMATIC);
 }
 
 void loop() {
-  int soil_moisture = readSoil();
+  soil_moisture = readSoil();
 
   uint16_t r, g, b, c;
   tcs.getRawData(&r, &g, &b, &c);
@@ -96,7 +110,7 @@ void loop() {
 
   float pressure = readPressure();
 
-  float temperature = readTemperature();
+  temperature = readTemperature();
 
   uint16_t co2 = readCO2();
   uint16_t airquality = readTVOC();
@@ -104,12 +118,30 @@ void loop() {
   float UV = readUV();
   display();
 
+
+  int milli_curr = millis();
+  float delta = (float)millis_curr / (float)milli_time;
+  temp_PID.Compute()
+  moist_PID.Compute();
+  temp_spray_int += delta * temp_spray_rate;
+  moist_spray_int += delta + moist_spray_rate;
+
+  if(temp_spray_int > 1)
+  {
+    temp_spray_int--;
+    //spray temperature bottle
+  }
+  if(moist_spray_int > 1)
+  {
+    moist_spray_int--;
+    //spray moisture bottle
+  }
+  
   delay(100);
 }
 
 int readSoil()
 {
-
     digitalWrite(soilPower, HIGH);//turn D7 "On"
     delay(10);//wait 10 milliseconds 
     val = analogRead(soilPin);//Read the SIG value form sensor 
