@@ -1,3 +1,10 @@
-AI Greenhouse Project
+# AI Greenhouse
 
-Google doc for ideas https://docs.google.com/document/d/1u7kN8Uaeoqz3P9GPeUdTH8qYphs6lny3UAJh7AUJc9g/edit?usp=sharing
+A project for **VTHacks 11** made with ❤️ by [Abraham Tenorio](https://github.com/CarpenterA1), [Abdullah Khurram](https://github.com/abkhur), [Nick Bonanno](https://github.com/TheBananna), and [Robert Higinbotham](https://github.com/Hefadog2).
+
+# How does it work?
+
+TODO
+
+## Contact us
+TODO
