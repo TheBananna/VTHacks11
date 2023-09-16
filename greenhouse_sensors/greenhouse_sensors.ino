@@ -53,15 +53,15 @@ Adafruit_CCS811 ccs;
 
 Adafruit_VEML6070 uv = Adafruit_VEML6070();
 
-float temperature;
-float temp_goal;
-float soil_moisture;
-float moisture_goal;
-float temp_spray_rate = 0;
-float temp_spray_int = 0;
-float moist_spray_rate = 0;
-float moist_spray_int = 0;
-PID temp_pid(&temperature, &temp_spray_rate, &temp_goal, .00001, .001, .0001);//PID tuning will be needed here or we just abandon using PID loops
+double temperature;
+double temp_goal;
+double soil_moisture;
+double moisture_goal;
+double temp_spray_rate = 0;
+double temp_spray_int = 0;
+double moist_spray_rate = 0;
+double moist_spray_int = 0;
+PID temp_pid(&temperature, &temp_spray_rate, &temp_goal, .00001, .001, .0001, DIRECT);//PID tuning will be needed here or we just abandon using PID loops
 //PID moist_PID(&soil_moisture, &moiust_spray_int, &moisture_goal, .0001, .001, .0001);
 //due to relatively sealed nature the moisture loop will be slow/stable enough to just check the soil moisture every 5 minutes and spray if needed
 
@@ -97,8 +97,8 @@ void setup() {
 
   uv.begin(VEML6070_1_T);  // pass in the integration time constant
   milli_time = millis();
-  temp_PID.SetMode(AUTOMATIC);
-  moist_PID.SetMode(AUTOMATIC);
+  temp_pid.SetMode(AUTOMATIC);
+  //moist_PID.SetMode(AUTOMATIC);
 }
 
 void loop() {
@@ -122,8 +122,8 @@ void loop() {
 
 
   int milli_curr = millis();
-  float delta = (float)millis_curr / (float)milli_time;
-  temp_PID.Compute()
+  float delta = (float)milli_curr / (float)milli_time;
+  temp_pid.Compute();
   //moist_PID.Compute();
   temp_spray_int += delta * temp_spray_rate;
   //moist_spray_int += delta + moist_spray_rate;
