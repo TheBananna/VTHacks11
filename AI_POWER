@@ -3,7 +3,7 @@ import requests
 
 # OpenAI API endpoint and your API key
 ENDPOINT = "https://api.openai.com/v1/engines/davinci/completions"  # This might change based on OpenAI's documentation
-API_KEY = "YOUR_OPENAI_API_KEY"
+API_KEY = "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"
 
 # Define a function to analyze the data using ChatGPT
 def analyze_data_with_chatgpt(data):
@@ -34,7 +34,7 @@ ser = serial.Serial('COM3', 9600)  # Change 'COM3' to your Arduino's port and 96
 try:
     while True:
         # Read a line from the serial port
-        line = ser.readline().decode('utf-8').strip()
+        line = ser.readline().decode('ASCII').strip()
         
         # Call the analyze function
         result = analyze_data_with_chatgpt(line)
