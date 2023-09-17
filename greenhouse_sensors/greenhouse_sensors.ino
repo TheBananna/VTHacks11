@@ -70,6 +70,7 @@ int count5 = 0;//count of 5 minute intervals that have passed
 
 void setup() {
  Serial.begin(9600);
+ Serial1.begin(9600);
  lcd.begin(16, 2);
   if (tcs.begin()) {
     Serial.println("Found sensor");
