@@ -71,17 +71,19 @@ int count5 = 0;//count of 5 minute intervals that have passed
 void setup() {
  Serial.begin(9600);
  Serial1.begin(9600);
+ Serial.print("Started");
  lcd.begin(16, 2);
   if (tcs.begin()) {
     Serial.println("Found sensor");
   } else {
     Serial.println("No TCS34725 found ... check your connections");
-    while (1);
+    //while (1);
   }
 
 
 
-  myPressure.begin(); // Get sensor online
+  if(!myPressure.begin())
+    Serial.println("Pressure error");
 
   //Configure the sensor
   
@@ -94,10 +96,11 @@ void setup() {
 
   if(!ccs.begin()){
     Serial.println("Failed to start sensor! Please check your wiring.");
-    while(1);
+    //while(1);
   }
 
-  uv.begin(VEML6070_1_T);  // pass in the integration time constant
+  if(!uv.begin(VEML6070_1_T))
+    Serial.println("EV error");  // pass in the integration time constant
   milli_time = millis();
   temp_pid.SetMode(AUTOMATIC);
   //moist_PID.SetMode(AUTOMATIC);
