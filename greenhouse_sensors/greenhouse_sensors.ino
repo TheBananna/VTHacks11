@@ -151,6 +151,7 @@ void loop() {
   if(Serial1.available())
   {
     char c = Serial1.read();
+    Serial.println("Char detected" + c);
     if(c == 'S')
       Serial1.println(soil_moisture);
     else if(c == 'R')
