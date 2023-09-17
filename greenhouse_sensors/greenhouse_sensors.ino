@@ -1,5 +1,5 @@
 #include <Adafruit_STMPE610.h>
-
+#include <CurieBLE.h>
 #include <Adafruit_TCS34725.h>
 
 #include <SPI.h>
@@ -67,6 +67,7 @@ PID temp_pid(&temperature, &temp_spray_rate, &temp_goal, .00001, .001, .0001, DI
 
 int milli_time;
 int count5 = 0;//count of 5 minute intervals that have passed
+
 void setup() {
  Serial.begin(9600);
  lcd.begin(16, 2);
@@ -99,6 +100,7 @@ void setup() {
   milli_time = millis();
   temp_pid.SetMode(AUTOMATIC);
   //moist_PID.SetMode(AUTOMATIC);
+
 }
 
 void loop() {
@@ -119,7 +121,6 @@ void loop() {
 
   float UV = readUV();
   display();
-
 
   int milli_curr = millis();
   float delta = (float)milli_curr / (float)milli_time;
@@ -143,6 +144,34 @@ void loop() {
     every5();
     count5++;
   }
+
+
+  //Bluetooth
+  if(Serial.available())
+  {
+    char c = Serial.read();
+    if(c == 'S')
+      Serial.println(soil_moisture);
+    else if(c == 'R')
+      Serial.println(r);
+    else if(c == 'G')
+      Serial.println(g);
+    else if(c == 'B')
+      Serial.println(b);
+    else if(c == 'L')
+      Serial.println(lightIntensity);
+    else if(c == 'P')
+      Serial.println(pressure);
+    else if(c == 'T')
+      Serial.println(temperature);
+    else if(c == 'C')
+      Serial.println(co2);
+    else if(c == 'A')
+      Serial.println(airquality);
+    else
+      Serial.println(UV);
+  }
+
   delay(100);
 }
 
