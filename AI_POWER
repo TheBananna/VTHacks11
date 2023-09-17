@@ -1,0 +1,45 @@
+import serial
+import requests
+
+# OpenAI API endpoint and your API key
+ENDPOINT = "https://api.openai.com/v1/engines/davinci/completions"  # This might change based on OpenAI's documentation
+API_KEY = "YOUR_OPENAI_API_KEY"
+
+# Define a function to analyze the data using ChatGPT
+def analyze_data_with_chatgpt(data):
+    headers = {
+        "Authorization": f"Bearer {API_KEY}",
+        "Content-Type": "application/json"
+    }
+    
+    # Construct the prompt for ChatGPT
+    prompt = f"Analyze the following Arduino data: {data}"
+    
+    data_payload = {
+        "prompt": prompt,
+        "max_tokens": 150
+    }
+    
+    response = requests.post(ENDPOINT, headers=headers, json=data_payload)
+    
+    if response.status_code == 200:
+        response_json = response.json()
+        return response_json['choices'][0]['text'].strip()
+    else:
+        return f"Error: {response.text}"
+
+# Set up the serial connection
+ser = serial.Serial('COM3', 9600)  # Change 'COM3' to your Arduino's port and 9600 to your baud rate
+
+try:
+    while True:
+        # Read a line from the serial port
+        line = ser.readline().decode('utf-8').strip()
+        
+        # Call the analyze function
+        result = analyze_data_with_chatgpt(line)
+        print(result)
+except KeyboardInterrupt:
+    # Close the serial connection
+    ser.close()
+    print("Serial connection closed.")
