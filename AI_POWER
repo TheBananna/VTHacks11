@@ -2,26 +2,25 @@ import serial
 import requests
 
 # OpenAI API endpoint and your API key
-ENDPOINT = "https://api.openai.com/v1/engines/davinci/completions"  # This might change based on OpenAI's documentation
+ENDPOINT = "https://api.openai.com/v1/engines/davinci/completions"
 API_KEY = "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"
 
-# Define a function to analyze the data using ChatGPT
-def analyze_data_with_chatgpt(data):
+# Function to get recommendations from ChatGPT
+def get_recommendation_from_chatgpt(data):
     headers = {
         "Authorization": f"Bearer {API_KEY}",
         "Content-Type": "application/json"
     }
-    
-    # Construct the prompt for ChatGPT
-    prompt = f"Analyze the following Arduino data: {data}"
-    
+
+    prompt = f"Based on the greenhouse data: Soil Moisture: {data['soil_moisture']}%, RGB Values: {data['rgb']}, Light Intensity: {data['light_intensity']}, Atmospheric Pressure: {data['pressure']}, Temperature: {data['temperature']}°C, UV Light: {data['uv']} UV index, provide recommendations for optimal plant growth."
+
     data_payload = {
         "prompt": prompt,
-        "max_tokens": 150
+        "max_tokens": 250
     }
-    
+
     response = requests.post(ENDPOINT, headers=headers, json=data_payload)
-    
+
     if response.status_code == 200:
         response_json = response.json()
         return response_json['choices'][0]['text'].strip()
@@ -29,17 +28,28 @@ def analyze_data_with_chatgpt(data):
         return f"Error: {response.text}"
 
 # Set up the serial connection
-ser = serial.Serial('COM3', 9600)  # Change 'COM3' to your Arduino's port and 9600 to your baud rate
+ser = serial.Serial('COM3', 9600)  # Adjust port & baud rate
 
 try:
     while True:
-        # Read a line from the serial port
-        line = ser.readline().decode('ASCII').strip()
-        
-        # Call the analyze function
-        result = analyze_data_with_chatgpt(line)
-        print(result)
+        # Here, I'm assuming a comma-separated string from the Arduino in the order of: 
+        # soil_moisture,rgb,light_intensity,pressure,temperature,uv
+        line = ser.readline().decode('utf-8').strip()
+        soil_moisture, rgb, light_intensity, pressure, temperature, uv = map(str, line.split(','))
+
+        data = {
+            'soil_moisture': soil_moisture,
+            'rgb': rgb,
+            'light_intensity': light_intensity,
+            'pressure': pressure,
+            'temperature': temperature,
+            'uv': uv
+        }
+
+        recommendation = get_recommendation_from_chatgpt(data)
+        print(recommendation)
+
 except KeyboardInterrupt:
-    # Close the serial connection
     ser.close()
     print("Serial connection closed.")
+
